@@ -1,0 +1,56 @@
+---
+title: "Hello TTSI"
+author: "Transition Technologies Science"
+date: 2024-09-16
+categories: ["Clinical Data Science", "R"]
+tags: ["R Markdown", "Clinical Data", "Optimization", "TTSI"]
+---
+
+
+
+<div id="introduction-to-clinical-data-science-at-ttsi" class="section level1">
+<h1>Introduction to Clinical Data Science at TTSI</h1>
+<p>This is a demonstration of how <strong>R Markdown</strong> can be used to generate reports and visualizations relevant to <strong>clinical data science</strong>. At <strong>TTSI</strong>, we specialize in study simulations, sample size estimation, and live anomaly detection. Markdown allows us to format reports that are dynamic and reproducible.</p>
+<p>You can embed an R code chunk like this to perform basic data analysis, for example:</p>
+<pre class="r"><code># Example using the built-in cars dataset
+summary(cars)
+##      speed           dist       
+##  Min.   : 4.0   Min.   :  2.00  
+##  1st Qu.:12.0   1st Qu.: 26.00  
+##  Median :15.0   Median : 36.00  
+##  Mean   :15.4   Mean   : 42.98  
+##  3rd Qu.:19.0   3rd Qu.: 56.00  
+##  Max.   :25.0   Max.   :120.00
+
+# Simulate a simple linear model that could be relevant in clinical data analysis
+fit &lt;- lm(dist ~ speed, data = cars)
+fit
+## 
+## Call:
+## lm(formula = dist ~ speed, data = cars)
+## 
+## Coefficients:
+## (Intercept)        speed  
+##     -17.579        3.932</code></pre>
+</div>
+<div id="including-visualizations" class="section level1">
+<h1>Including Visualizations</h1>
+<p>At TTSI, visualizations are essential for interpreting complex data from clinical trials. Below is a sample pie chart (Figure <a href="#fig:pie">1</a>) demonstrating a common method for displaying categorical data distributions, like treatment groups in a clinical study.</p>
+<pre class="r"><code>par(mar = c(0, 1, 0, 1))
+pie(
+    c(150, 100, 50),
+    c(&#39;Treatment A&#39;, &#39;Treatment B&#39;, &#39;Placebo&#39;),
+    col = c(&#39;#1f77b4&#39;, &#39;#ff7f0e&#39;, &#39;#2ca02c&#39;),
+    init.angle = -30, border = NA
+)</code></pre>
+<div class="figure"><span style="display:block;" id="fig:pie"></span>
+<img src="{{< blogdown/postref >}}index_files/figure-html/pie-1.png" alt="Distribution of Treatment Groups in a Study." width="672" />
+<p class="caption">
+Figure 1: Distribution of Treatment Groups in a Study.
+</p>
+</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>This document showcases how <strong>R Markdown</strong> can be effectively utilized at <strong>TTSI</strong> for producing clinical reports, visualizations, and data analysis outputs that are dynamic and reproducible.</p>
+</div>
