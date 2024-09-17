@@ -47,7 +47,7 @@ fit |>
 
 # Including Visualizations
 
-At TTSI, visualizations are essential for interpreting complex data from clinical trials. Below is a sample pie chart (Figure <a href="#fig:pie">1</a>) demonstrating a common method for displaying categorical data distributions, like treatment groups in a clinical study.
+At TTSI, visualizations are essential for interpreting complex data from clinical trials. Below is a sample pie chart (Figure <a href="#fig:pie"><strong>??</strong></a>) demonstrating a common method for displaying categorical data distributions, like treatment groups in a clinical study.
 
 
 ``` r
@@ -62,10 +62,7 @@ plot
 ## `geom_smooth()` using formula = 'y ~ x'
 ```
 
-<div class="figure">
-<img src="{{< blogdown/postref >}}index_files/figure-html/pie-1.png" alt="Distribution of Treatment Groups in a Study." width="672" />
-<p class="caption"><span id="fig:pie"></span>Figure 1: Distribution of Treatment Groups in a Study.</p>
-</div>
+<img src="{{< blogdown/postref >}}index_files/figure-html/pie-1.png" width="672" />
 
 # Conclusion
 

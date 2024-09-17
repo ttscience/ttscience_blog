@@ -33,3 +33,6 @@ markup:
     style: "github" # Choose a Chroma theme you like (e.g., "monokai", "dracula", "github")
     codeFences: true # Enable syntax highlighting for code fences
     guessSyntax: true # Automatically guess the language if not specified
+  goldmark:
+    renderer:
+      unsafe: true

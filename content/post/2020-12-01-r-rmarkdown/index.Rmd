@@ -35,7 +35,7 @@ fit |>
 
 At TTSI, visualizations are essential for interpreting complex data from clinical trials. Below is a sample pie chart (Figure \@ref(fig:pie)) demonstrating a common method for displaying categorical data distributions, like treatment groups in a clinical study.
 
-```{r pie, fig.cap='Distribution of Treatment Groups in a Study.'}
+```{r pie}
 plot <- 
   ggplot(ToothGrowth, aes(x = dose, y = len)) +
   geom_point() +  # Add points for the raw data
