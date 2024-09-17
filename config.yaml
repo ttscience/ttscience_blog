@@ -8,6 +8,9 @@ ignoreFiles:
   - _cache$
 permalinks:
   post: /:year/:month/:day/:slug/
+services:
+  googleAnalytics:
+    id: "G-3MKP9QPBP1"
 menu:
   main:
     - name: About

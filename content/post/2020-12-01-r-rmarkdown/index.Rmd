@@ -1,6 +1,6 @@
 ---
-title: "Hello TTSI"
-author: "Transition Technologies Science"
+title: "This is just testing!"
+author: "Kamil Sijko"
 date: 2024-09-16
 categories: ["Clinical Data Science", "R"]
 tags: ["R Markdown", "Clinical Data", "Optimization", "TTSI"]
@@ -8,6 +8,7 @@ tags: ["R Markdown", "Clinical Data", "Optimization", "TTSI"]
     
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE)
+library(ggplot2)
 ```
 
 # Introduction to Clinical Data Science at TTSI
@@ -17,26 +18,32 @@ This is a demonstration of how **R Markdown** can be used to generate reports an
 You can embed an R code chunk like this to perform basic data analysis, for example:
     
 ```{r cars}
-# Example using the built-in cars dataset
-summary(cars)
+# Load the ToothGrowth dataset
+data(ToothGrowth)
 
-# Simulate a simple linear model that could be relevant in clinical data analysis
-fit <- lm(dist ~ speed, data = cars)
-fit
+# Inspect the first few rows
+head(ToothGrowth)
+
+# Fit a linear model to predict tooth length based on the dose of vitamin C
+fit <- lm(len ~ dose, data = ToothGrowth)
+fit |> 
+  broom::tidy() |> 
+  knitr::kable(digits = 2)
 ```
 
 # Including Visualizations
 
 At TTSI, visualizations are essential for interpreting complex data from clinical trials. Below is a sample pie chart (Figure \@ref(fig:pie)) demonstrating a common method for displaying categorical data distributions, like treatment groups in a clinical study.
 
-```{r pie, fig.cap='Distribution of Treatment Groups in a Study.', tidy=FALSE}
-par(mar = c(0, 1, 0, 1))
-pie(
-    c(150, 100, 50),
-    c('Treatment A', 'Treatment B', 'Placebo'),
-    col = c('#1f77b4', '#ff7f0e', '#2ca02c'),
-    init.angle = -30, border = NA
-)
+```{r pie, fig.cap='Distribution of Treatment Groups in a Study.'}
+plot <- 
+  ggplot(ToothGrowth, aes(x = dose, y = len)) +
+  geom_point() +  # Add points for the raw data
+  geom_smooth(method = "lm", col = "blue") +  # Add the linear model line
+  labs(title = "Linear Model: Tooth Length vs Vitamin C Dose",
+       x = "Dose of Vitamin C (mg)",
+       y = "Tooth Length") 
+plot
 ```
 
 # Conclusion
