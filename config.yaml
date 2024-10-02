@@ -14,15 +14,15 @@ services:
 menu:
   main:
     - identifier: about
-      name: 🧑 About us
+      name: About us
       url: /about/
       weight: 1
     - identifier: archives
-      name: 📖 Archives
-      url: /archives/
+      name: Archive
+      url: /archive/
       weight: 2
     - identifier: search
-      name: 🔎 Search
+      name: Search
       url: /search/
       weight: 3
 params:
