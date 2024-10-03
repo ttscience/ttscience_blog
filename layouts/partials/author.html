@@ -1,0 +1,14 @@
+{{ range .Param "authors" }}
+    {{ $name := . }}
+    {{ $path := printf "/%s/%s" "authors" ($name | urlize) }}
+    {{ with $.Site.GetPage $path }}
+        <div class="author-info" style="display: flex; align-items: center; margin-bottom: 20px;">
+            <img src="/img{{ $path }}.jpg" style="width: 80px; height: 80px; border-radius: 50%; margin-right: 15px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+            <div>
+                <h2 style="margin: 0; font-size: 1.5em;">{{ .Params.name }}</h2>
+                <p style="margin: 5px 0; font-size: 0.9em; color: #666;">{{ .Params.bio }}</p>
+                <p><a href="{{ .Params.linkedin }}" style="text-decoration: none; color: #007bff;">LinkedIn</a></p>
+            </div>
+        </div>
+    {{ end }}
+{{ end }}

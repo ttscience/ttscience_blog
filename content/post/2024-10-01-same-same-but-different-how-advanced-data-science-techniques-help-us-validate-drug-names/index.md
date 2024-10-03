@@ -1,7 +1,7 @@
 ---
-title: 'Same-Same, but Different: How t-SNE, Levenshtein  and DBSCAN Spy the Typos in
+title: 'Same-Same, but Different: How Advanced Data Science Techniques Help Us Validate
   Drug Names'
-author: Kamil Pytlak
+authors: ["kamil-pytlak"]
 date: '2024-10-01'
 categories:
   - machine learning
@@ -11,11 +11,12 @@ categories:
 tags:
   - data visualization
   - drug names
-  - EDC
+  - eCRF
+  - data validation
   - levenshtein distance
   - NLP
   - t-SNE
-slug: same-same-but-different-how-t-sne-levenshtein-and-dbscan-spy-the-typos-in-drug-names
+slug: same-same-but-different-how-advanced-data-science-techniques-help-us-validate-drug-names
 ShowToc: yes
 TocOpen: yes
 ---
@@ -93,13 +94,16 @@ Do you see what's going on here? In a system that's not quite fully automated, d
 
 ## t-SNE + Distance Metrics = Visualization of Similarity Between Texts
 
-To tackle this problem, we can use text distance metrics like Levenshtein distance, which measures the number of single-character edits needed to transform one string into another. By working out the distances between the drug names, we can spot the subtle differences and similarities between them. But a matrix of distances doesn't give us much insight that we can easily grasp. This is where t-SNE (t-distributed Stochastic Neighbor Embedding) comes in handy. t-SNE lets us turn high-dimensional distance matrices into a 2D visualization, where similar items cluster together. In our example, drug names like "Ibuprofin" and "Ibuprofine" will be grouped together, making the typo patterns immediately visible. So, using t-SNE with distance metrics lets us not only measure how similar texts are, but also see them on a map. This makes it easier to spot inconsistencies in drug names, which is useful for cleaning up data and making sure it's of good quality.
+To tackle the problem of detecting variations in drug names, we can use text distance metrics like Levenshtein distance, which measures the edits needed to transform one string into another. By calculating these distances, we can identify subtle differences. However, a distance matrix can be difficult to interpret. This is where t-SNE (t-distributed Stochastic Neighbor Embedding) is useful. It converts high-dimensional distance matrices into a 2D visualization, clustering similar items together. For example, typos like “Ibuprofin” and “Ibuprofine” will appear close together, making it easier to spot inconsistencies in drug names.
 
-This approach turns a complex problem of detecting subtle textual variations in drug names into a visual pattern-recognition task. Drug names with a lot of typos or different spellings stand out as small, tight clusters. For instance, "Omeprazole" and its variations ("Omeprazo" or "Omeparzole") will form a small group that's distinct from other medications. Similarly, names like "Warfarin" and "Warferin" will also cluster close to each other. The great thing about this visualization is that it can be used not only to identify errors but also to track down systematic inconsistencies across large datasets. Are there recurring typos for certain drugs? Are the same misspellings repeated by different researchers? Such insights can be hard to glean from simple tabular summaries, but they're made obvious when visualized.
+This approach transforms the complex task of detecting textual variations into a visual pattern-recognition challenge. Drug names with multiple typos or spellings cluster together; for instance, “Omeprazole” and its variations will form distinct groups, while names like “Warfarin” and “Warferin” will cluster closely. This visualization reveals patterns that are hard to discern in tables, such as recurring typos for specific drugs or misspellings used by different researchers.
 
-What's more, t-SNE isn't just for visualizing individual typos. It can also help you spot more complex patterns. Picture this: multiple versions of drug names are all over the place because of regional spelling differences (like "Amoxicillin" vs. "Amoxycillin") or inconsistent expansion of abbreviations. In these cases, regular text-matching tools might not be able to spot these details, but t-SNE can still show which names are considered similar based on their edit distances. So, the technique takes all those raw string distance calculations and turns them into a more intuitive and user-friendly visual representation. This makes it a really powerful tool for clinical data scientists who need to maintain data integrity.
+Moreover, t-SNE can highlight complex patterns, like regional spelling differences (e.g., “Amoxicillin” vs. “Amoxycillin”). While traditional text-matching tools may miss these nuances, t-SNE effectively shows which names are similar based on their edit distances. When combined with interactive visualization tools like Plotly or ggplot, users can hover over data points to see original names, facilitating the exploration of clusters and enabling direct corrections. This method not only streamlines data cleaning but is crucial for maintaining drug name accuracy in clinical research, where precision is vital.
 
-Finally, combining t-SNE with interactive visualization tools like plotly or ggplot allows users to hover over each data point to see the original names. This lets you quickly explore the clusters and even make changes directly, like flagging incorrect entries or suggesting corrections. This method not only makes data cleaning more efficient but also helps you catch errors in critical analyses. In clinical research, where drug name accuracy can have a big impact, this simple, visual approach is really valuable.
+
+## Clustering - That Is, Group Similar Into Similar
+
+The graphics can be tricky to interpret, especially when we have a lot of drugs. That's why we use an algorithmic approach based on clustering "similar into similar" in our workflow. One clustering technique we find really effective is DBSCAN (Density-Based Spatial Clustering of Applications with Noise). This algorithm is great at identifying clusters of different shapes and sizes, which helps us find meaningful patterns in the complex landscape of drug names. By looking at how dense the data is, DBSCAN groups similar drug names together while also showing us any outliers that might be typos. For example, it can group entries like "Ibuprofin" and "Ibuprofine," showing us any potential inconsistencies that could affect clinical trial results. This powerful approach not only makes the data more reliable but also makes it easier to clean up, so researchers can focus on getting good results in their clinical studies.
 
 
 # Case Study: Validation of Drug Names for a Pharmaceutical Gig
@@ -320,140 +324,25 @@ sample_drug_names_with_typos <- sapply(drug_names, function(name) {
 complete_drug_names <- c(drug_names, sample_drug_names_with_typos)
 
 # Add additional drug names in Polish
-complete_drug_names <- c(complete_drug_names, c("Kwas acetylosalicylowy i kortykosteroidy", # acetylsalicylic acid and corticosteroids
+complete_drug_names <- c(complete_drug_names, c("Kwas acetylosalicylowy i kortykosteroidy", # Acetylsalicylic acid and corticosteroids
                                                 "Węglan magnezu", # Magnesium carbonate
                                                 "Kwas foliowy" # Folic acid
 ))
 
-unique(complete_drug_names) |> sort()
+unique(complete_drug_names) |> sort() |> head(10)
 ```
 
 ```
-##   [1] "acetylsalicylic acid and corticosteroids"      
-##   [2] "aluminium preparations"                        
-##   [3] "aminophylline"                                 
-##   [4] "amphotericin B"                                
-##   [5] "antazoline"                                    
-##   [6] "artesunate and amdoiaquine"                    
-##   [7] "artesunate and amodiaquine"                    
-##   [8] "azacitidine"                                   
-##   [9] "benazepril and amlodipine"                     
-##  [10] "benazepril nd amlodipine"                      
-##  [11] "benzocaine"                                    
-##  [12] "benzoly peroxide"                              
-##  [13] "benzoyl peroxide"                              
-##  [14] "betaine hydrochloride"                         
-##  [15] "betametahsone"                                 
-##  [16] "betamethasone"                                 
-##  [17] "betaxolol, combinations"                       
-##  [18] "betaxolol, cominations"                        
-##  [19] "bexagliflozin"                                 
-##  [20] "biperiden"                                     
-##  [21] "bupivacaine and meloxicam"                     
-##  [22] "buspirone"                                     
-##  [23] "calcium lactate"                               
-##  [24] "calcium lactate gluconate"                     
-##  [25] "calcium lactate guconate"                      
-##  [26] "captopril"                                     
-##  [27] "carumonam"                                     
-##  [28] "casopitant"                                    
-##  [29] "cefapirin"                                     
-##  [30] "ceftibuten"                                    
-##  [31] "chymopapain"                                   
-##  [32] "clotiazepam"                                   
-##  [33] "cyanocobalamin"                                
-##  [34] "desonide and antiseptics"                      
-##  [35] "dexamethasone and antiinfectives"              
-##  [36] "dfluprednate"                                  
-##  [37] "difluprednate"                                 
-##  [38] "digitalis leaves"                              
-##  [39] "digitalis lleaves"                             
-##  [40] "diisopromine"                                  
-##  [41] "eosin"                                         
-##  [42] "epinastine"                                    
-##  [43] "eplonteresn"                                   
-##  [44] "eplontersen"                                   
-##  [45] "eptifibatide"                                  
-##  [46] "ferric acetyl transferrin"                     
-##  [47] "fluciclovine (18F)"                            
-##  [48] "flumetasone"                                   
-##  [49] "fluorouracil, combinations"                    
-##  [50] "flutrimazole"                                  
-##  [51] "folic acid"                                    
-##  [52] "fostemsavir"                                   
-##  [53] "fostemsvir"                                    
-##  [54] "fulmetasone"                                   
-##  [55] "gatifloxacin"                                  
-##  [56] "gefarnate, combinations with psycholeptics"    
-##  [57] "histapyrrodine, combinations"                  
-##  [58] "Hyerici herba"                                 
-##  [59] "Hyperici herba"                                
-##  [60] "idrocilamide"                                  
-##  [61] "indometacin, combinations"                     
-##  [62] "indometacinn, combinations"                    
-##  [63] "iodine iofetamine (123I)"                      
-##  [64] "isoprenaline"                                  
-##  [65] "istradefylline"                                
-##  [66] "kanamycin"                                     
-##  [67] "Kwas acetylosalicylowy i kortykosteroidy"      
-##  [68] "Kwas foliowy"                                  
-##  [69] "lactulose"                                     
-##  [70] "levodopa"                                      
-##  [71] "levonorgestrel"                                
-##  [72] "lincomycin"                                    
-##  [73] "lnicomycin"                                    
-##  [74] "magnesium carbonate"                           
-##  [75] "mecasermin"                                    
-##  [76] "megestrol and estorgen"                        
-##  [77] "megestrol and estrogen"                        
-##  [78] "menadione"                                     
-##  [79] "menadionee"                                    
-##  [80] "methaqualone"                                  
-##  [81] "micafungin"                                    
-##  [82] "moexipril and diuretics"                       
-##  [83] "narcobarbital"                                 
-##  [84] "nebivolol ad amlodipine"                       
-##  [85] "nebivolol and amlodipine"                      
-##  [86] "nimetazepam"                                   
-##  [87] "odevixibat"                                    
-##  [88] "oedvixibat"                                    
-##  [89] "pegloticase"                                   
-##  [90] "perphenazine"                                  
-##  [91] "pethidine"                                     
-##  [92] "phenylephrine"                                 
-##  [93] "pipotiazine"                                   
-##  [94] "pirprofen"                                     
-##  [95] "plerixafor"                                    
-##  [96] "potassium citrate"                             
-##  [97] "pottassium citrate"                            
-##  [98] "prazosin"                                      
-##  [99] "prednisone"                                    
-## [100] "remoxiipride"                                  
-## [101] "remoxipride"                                   
-## [102] "reteplase"                                     
-## [103] "rifamycin"                                     
-## [104] "rivastigmine"                                  
-## [105] "roxithromycin"                                 
-## [106] "salsalate"                                     
-## [107] "sorbitol"                                      
-## [108] "srteptokinase"                                 
-## [109] "streptokinase"                                 
-## [110] "succinimide"                                   
-## [111] "taurolidine"                                   
-## [112] "technetium (99mTc) perechnetate"               
-## [113] "technetium (99mTc) pertechnetate"              
-## [114] "teneligliptin"                                 
-## [115] "theophylline, combinations excl. psycholeptics"
-## [116] "ticarcillin"                                   
-## [117] "tiemonium iodide and analgesics"               
-## [118] "timolol, thiazides and other diuretics"        
-## [119] "tolperisone"                                   
-## [120] "tramadol"                                      
-## [121] "tretoquinol"                                   
-## [122] "trypsin, combinations"                         
-## [123] "ursodoxicoltaurine"                            
-## [124] "Węglan magnezu"                                
-## [125] "zidovudine"
+##  [1] "acetylsalicylic acid and corticosteroids"
+##  [2] "aluminium preparations"                  
+##  [3] "aminophylline"                           
+##  [4] "amphotericin B"                          
+##  [5] "antazoline"                              
+##  [6] "artesunate and amdoiaquine"              
+##  [7] "artesunate and amodiaquine"              
+##  [8] "azacitidine"                             
+##  [9] "benazepril and amlodipine"               
+## [10] "benazepril nd amlodipine"
 ```
 And now for the most interesting part: we will visualize the names of the drugs on the chart. This is a two-step process:
 
