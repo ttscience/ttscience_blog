@@ -1,6 +1,7 @@
 ---
 date: "2024-10-01T16:48:51-07:00"
 title: About Us
+disableComments: true
 ---
 
 We’re writing here as practitioners in clinical statistics, data science, and machine learning. We’re not marketers—we’re the ones in the trenches, working with data every day to solve real-world problems. If you want to check our official page, visit Transition Technologies Science—you’ll learn that we provide software, data science services, and offer analytical support at every stage of clinical trials.
