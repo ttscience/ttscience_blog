@@ -134,7 +134,7 @@ To begin with, we will simulate sample patients and, in particular, the medicati
 
 ``` r
 library(dplyr)
-library(stringdist )
+library(stringdist)
 library(Rtsne)
 library(dbscan)
 library(ggrepel)
@@ -168,10 +168,11 @@ Next, we will extract only drug names (length `atc_code` equal to 7) and draw 10
 
 ``` r
 set.seed(7)
+
 drug_names <- atc_df |>
-  filter(nchar(atc_code) == 7) |>
-  slice_sample(n = 100, replace = TRUE) |>
-  pull(atc_name)
+  dplyr::filter(nchar(atc_code) == 7) |>
+  dplyr::slice_sample(n = 100, replace = TRUE) |>
+  dplyr::pull(atc_name)
 
 unique(drug_names) |> sort()
 ```
@@ -313,6 +314,7 @@ Each drug name in `drug_names` has a 30% chance of generating a variation, so we
 
 ``` r
 set.seed(7)
+
 sample_drug_names_with_typos <- sapply(drug_names, function(name) {
   if (runif(1) <= 0.3) {
     introduce_variation(name)
@@ -372,7 +374,7 @@ optimize_perplexity <-
     n <- nrow(data)
     
     for (perp in seq(min_perp, max_perp, step)) {
-      tsne_res <- Rtsne(data, is_distance = TRUE, perplexity = perp)
+      tsne_res <- Rtsne::Rtsne(data, is_distance = TRUE, perplexity = perp)
       
       kl_divergence <- 2 * min(tsne_res$itercosts) + log(n) * (perp / n)
       
@@ -394,9 +396,12 @@ We also want to figure out which drugs are in the same group. Each group should 
 
 
 ``` r
-construct_tsne_with_dbscan <- function(data, max_perp = 20, eps = 15, minPts = 2) {
+construct_tsne_with_dbscan <- function(data,
+                                       max_perp = 20,
+                                       eps = 15,
+                                       minPts = 2) {
   # Step 1: Create a Levenshtein distance matrix
-  distance_matrix <- stringdistmatrix(data, data, method = "lv")
+  distance_matrix <- stringdist::stringdistmatrix(data, data, method = "lv")
   rownames(distance_matrix) <- data
   colnames(distance_matrix) <- data
   
@@ -407,19 +412,19 @@ construct_tsne_with_dbscan <- function(data, max_perp = 20, eps = 15, minPts = 2
   set.seed(7)
   
   best_perplexity <- optimize_perplexity(distance_mtx, max_perp = max_perp)
-
-  tsne_result <- Rtsne(distance_mtx,
-                       is_distance = TRUE,
-                       perplexity = best_perplexity)
-
+  
+  tsne_result <- Rtsne::Rtsne(distance_mtx,
+                              is_distance = TRUE,
+                              perplexity = best_perplexity)
+  
   # Step 4: Create a data frame with t-SNE results and drug labels
   tsne_df <- data.frame(Dim1 = tsne_result$Y[, 1],
                         Dim2 = tsne_result$Y[, 2],
                         Label = data)
-
-  # Step 5: Perform OPTICS clustering on the t-SNE coordinates
+  
+  # Step 5: Perform DBSCAN clustering on the t-SNE coordinates
   # Use the t-SNE coordinates for density-based clustering
-  dbscan_result <- dbscan(distance_mtx, eps = eps, minPts = minPts)
+  dbscan_result <- dbscan::dbscan(distance_mtx, eps = eps, minPts = minPts)
   
   # Step 6: Add the DBSCAN cluster labels to the data frame
   tsne_df$Cluster <- as.factor(dbscan_result$cluster)
@@ -496,12 +501,12 @@ tsne_df <- construct_tsne_with_dbscan(unique_drug_names)
 
 ``` r
 tsne_df |>
-    ggplot(aes(x = Dim1, y = Dim2, label = Label)) +
-    geom_point(aes(color = Cluster), size = 1) +
+  ggplot(aes(x = Dim1, y = Dim2, label = Label)) +
+  geom_point(aes(color = Cluster), size = 1) +
   geom_text_repel(aes(label = Label), max.overlaps = 10, size = 2) +
-    labs(x = "Dimension 1", y = "Dimension 2") +
-    guides(color = "none") +
-    theme_bw()
+  labs(x = "Dimension 1", y = "Dimension 2") +
+  guides(color = "none") +
+  theme_bw()
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-11-1.png" width="672" />
@@ -511,9 +516,9 @@ This graphic is pretty tricky to make sense of because there are so many data po
 
 ``` r
 clusters_list <- tsne_df |>
-    group_by(Cluster) |>
-    summarize(Drugs = paste(Label, collapse = " | ")) |>
-    arrange(Cluster)
+    dplyr::group_by(Cluster) |>
+    dplyr::summarize(Drugs = paste(Label, collapse = " | ")) |>
+    dplyr::arrange(Cluster)
   
   # Print each cluster and the associated drug names
   for (i in 1:nrow(clusters_list)) {
