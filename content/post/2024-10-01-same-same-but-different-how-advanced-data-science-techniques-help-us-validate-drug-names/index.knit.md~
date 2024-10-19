@@ -27,7 +27,8 @@ TocOpen: yes
 
 ... that we need to clean up our client's database for an upcoming interim analysis. We're looking at a lot of data, like patient demographics, patient outcomes (vital signs, physical exam, laboratory parameters), adverse events, and the medications they're taking. Once we load the data in R, it could look like this:
 
-```{r}
+
+``` r
 set.seed(7)
 
 patient_ids <- sample(1:100, 20, replace = TRUE)
@@ -51,10 +52,42 @@ con_meds_df <- data.frame(
 print(con_meds_df)
 ```
 
+```
+##    patient_id      con_med
+## 1          42      Aspirin
+## 2          83    Ibuprofin
+## 3          31  Paracetemol
+## 4          92     Metformn
+## 5          66   Lisinopril
+## 6          15   Omeprazole
+## 7          90    Metprolol
+## 8           8     Warferin
+## 9          67   Amoxcillin
+## 10         88  Simvastatin
+## 11         40       Aspirn
+## 12         22   Ibuprofine
+## 13         47   Paraceteml
+## 14          8    Metformin
+## 15         59   Lisinorpil
+## 16         90     Omeprazo
+## 17         12   Metoprolol
+## 18         51     Warfarin
+## 19         20    Amoxcilin
+## 20         40 Simavastatin
+```
+
 The first column shows the patient ID, and the second column shows the drug they're taking. Some medications are repeated for different patients, which is normal. But some medications have been entered incorrectly, like Aspirin - Aspirn, Ibuprofin - Ibuprofine, and Omeprazole - Omeprazo. Let's look at the uniqueness of drug names:
 
-```{r}
+
+``` r
 unique(con_meds_df$con_med) |> sort()
+```
+
+```
+##  [1] "Amoxcilin"    "Amoxcillin"   "Aspirin"      "Aspirn"       "Ibuprofin"   
+##  [6] "Ibuprofine"   "Lisinopril"   "Lisinorpil"   "Metformin"    "Metformn"    
+## [11] "Metoprolol"   "Metprolol"    "Omeprazo"     "Omeprazole"   "Paraceteml"  
+## [16] "Paracetemol"  "Simavastatin" "Simvastatin"  "Warfarin"     "Warferin"
 ```
 Do you see what's going on here? In a system that's not quite fully automated, drug names are entered by researchers. These are various researchers who don't have time to check which drug name is officially recognized as a model. Even if they do, it's easy to make a typo, even in the simplest of cases. 
 
@@ -98,15 +131,31 @@ To begin with, we will simulate sample patients and, in particular, the medicati
 
 > In the Anatomical Therapeutic Chemical (ATC) classification system, the active substances are divided into different groups according to the organ or system on which they act and their therapeutic, pharmacological and chemical properties. Drugs are classified in groups at five different levels. (WHO, https://www.who.int/tools/atc-ddd-toolkit/atc-classification)
 
-```{r}
+
+``` r
 atc_df <- read.csv("WHO ATC-DDD 2024-09-05.csv")
 
 head(atc_df, 10)
 ```
 
+```
+##    atc_code                        atc_name ddd  uom adm_r            note
+## 1         A ALIMENTARY TRACT AND METABOLISM  NA <NA>  <NA>            <NA>
+## 2       A01     STOMATOLOGICAL PREPARATIONS  NA <NA>  <NA>            <NA>
+## 3      A01A     STOMATOLOGICAL PREPARATIONS  NA <NA>  <NA>            <NA>
+## 4     A01AA      Caries prophylactic agents  NA <NA>  <NA>            <NA>
+## 5   A01AA01                 sodium fluoride 1.1   mg     O 0.5 mg fluoride
+## 6   A01AA02      sodium monofluorophosphate  NA <NA>  <NA>            <NA>
+## 7   A01AA03                         olaflur 1.1   mg     O            <NA>
+## 8   A01AA04               stannous fluoride  NA <NA>  <NA>            <NA>
+## 9   A01AA30                    combinations  NA <NA>  <NA>            <NA>
+## 10  A01AA51   sodium fluoride, combinations  NA <NA>  <NA>            <NA>
+```
+
 Next, we will extract only drug names (length `atc_code` equal to 7) and draw 100 drug names with possible repetitions.
 
-```{r}
+
+``` r
 set.seed(7)
 
 drug_names <- atc_df |>
@@ -117,9 +166,113 @@ drug_names <- atc_df |>
 unique(drug_names) |> sort()
 ```
 
+```
+##   [1] "acetylsalicylic acid and corticosteroids"      
+##   [2] "aluminium preparations"                        
+##   [3] "aminophylline"                                 
+##   [4] "amphotericin B"                                
+##   [5] "antazoline"                                    
+##   [6] "artesunate and amodiaquine"                    
+##   [7] "azacitidine"                                   
+##   [8] "benazepril and amlodipine"                     
+##   [9] "benzocaine"                                    
+##  [10] "benzoyl peroxide"                              
+##  [11] "betaine hydrochloride"                         
+##  [12] "betamethasone"                                 
+##  [13] "betaxolol, combinations"                       
+##  [14] "bexagliflozin"                                 
+##  [15] "biperiden"                                     
+##  [16] "bupivacaine and meloxicam"                     
+##  [17] "buspirone"                                     
+##  [18] "calcium lactate"                               
+##  [19] "calcium lactate gluconate"                     
+##  [20] "captopril"                                     
+##  [21] "carumonam"                                     
+##  [22] "casopitant"                                    
+##  [23] "cefapirin"                                     
+##  [24] "ceftibuten"                                    
+##  [25] "chymopapain"                                   
+##  [26] "clotiazepam"                                   
+##  [27] "cyanocobalamin"                                
+##  [28] "desonide and antiseptics"                      
+##  [29] "dexamethasone and antiinfectives"              
+##  [30] "difluprednate"                                 
+##  [31] "digitalis leaves"                              
+##  [32] "diisopromine"                                  
+##  [33] "eosin"                                         
+##  [34] "epinastine"                                    
+##  [35] "eplontersen"                                   
+##  [36] "eptifibatide"                                  
+##  [37] "ferric acetyl transferrin"                     
+##  [38] "fluciclovine (18F)"                            
+##  [39] "flumetasone"                                   
+##  [40] "fluorouracil, combinations"                    
+##  [41] "flutrimazole"                                  
+##  [42] "folic acid"                                    
+##  [43] "fostemsavir"                                   
+##  [44] "gatifloxacin"                                  
+##  [45] "gefarnate, combinations with psycholeptics"    
+##  [46] "histapyrrodine, combinations"                  
+##  [47] "Hyperici herba"                                
+##  [48] "idrocilamide"                                  
+##  [49] "indometacin, combinations"                     
+##  [50] "iodine iofetamine (123I)"                      
+##  [51] "isoprenaline"                                  
+##  [52] "istradefylline"                                
+##  [53] "kanamycin"                                     
+##  [54] "lactulose"                                     
+##  [55] "levodopa"                                      
+##  [56] "levonorgestrel"                                
+##  [57] "lincomycin"                                    
+##  [58] "magnesium carbonate"                           
+##  [59] "mecasermin"                                    
+##  [60] "megestrol and estrogen"                        
+##  [61] "menadione"                                     
+##  [62] "methaqualone"                                  
+##  [63] "micafungin"                                    
+##  [64] "moexipril and diuretics"                       
+##  [65] "narcobarbital"                                 
+##  [66] "nebivolol and amlodipine"                      
+##  [67] "nimetazepam"                                   
+##  [68] "odevixibat"                                    
+##  [69] "pegloticase"                                   
+##  [70] "perphenazine"                                  
+##  [71] "pethidine"                                     
+##  [72] "phenylephrine"                                 
+##  [73] "pipotiazine"                                   
+##  [74] "pirprofen"                                     
+##  [75] "plerixafor"                                    
+##  [76] "potassium citrate"                             
+##  [77] "prazosin"                                      
+##  [78] "prednisone"                                    
+##  [79] "remoxipride"                                   
+##  [80] "reteplase"                                     
+##  [81] "rifamycin"                                     
+##  [82] "rivastigmine"                                  
+##  [83] "roxithromycin"                                 
+##  [84] "salsalate"                                     
+##  [85] "sorbitol"                                      
+##  [86] "streptokinase"                                 
+##  [87] "succinimide"                                   
+##  [88] "taurolidine"                                   
+##  [89] "technetium (99mTc) pertechnetate"              
+##  [90] "teneligliptin"                                 
+##  [91] "theophylline, combinations excl. psycholeptics"
+##  [92] "ticarcillin"                                   
+##  [93] "tiemonium iodide and analgesics"               
+##  [94] "timolol, thiazides and other diuretics"        
+##  [95] "tolperisone"                                   
+##  [96] "tramadol"                                      
+##  [97] "tretoquinol"                                   
+##  [98] "trypsin, combinations"                         
+##  [99] "ursodoxicoltaurine"                            
+## [100] "zidovudine"
+```
+
 We're looking to add a bit of confusion to our drug names, so we've created a function called `introduce_variation`. It takes a name and returns a new version with a duplicate, deleted, or rearranged character.
 
-```{r}
+
+``` r
 introduce_variation <- function(name) {
   # Randomly choose a type of modification to introduce a typo
   modification <- sample(c("duplicate", "remove", "swap"), 1)
@@ -147,7 +300,8 @@ introduce_variation <- function(name) {
 
 Each drug name in `drug_names` has a 30% chance of generating a variation, so we'll end up with about 130 drug names instead of 100. We'll also add some drug names from another language (Polish).
 
-```{r}
+
+``` r
 set.seed(7)
 
 sample_drug_names_with_typos <- sapply(drug_names, function(name) {
@@ -168,12 +322,26 @@ complete_drug_names <- c(complete_drug_names, c("Kwas acetylosalicylowy i kortyk
 
 unique(complete_drug_names) |> sort() |> head(10)
 ```
+
+```
+##  [1] "acetylsalicylic acid and corticosteroids"
+##  [2] "aluminium preparations"                  
+##  [3] "aminophylline"                           
+##  [4] "amphotericin B"                          
+##  [5] "antazoline"                              
+##  [6] "artesunate and amdoiaquine"              
+##  [7] "artesunate and amodiaquine"              
+##  [8] "azacitidine"                             
+##  [9] "benazepril and amlodipine"               
+## [10] "benazepril nd amlodipine"
+```
 And now for the most interesting part: we will visualize the names of the drugs on the chart. This is a two-step process:
 
 1. Constructing a $ n \times n $ edit distance matrix between drug names using the Levenshtein  distance metric.
 2. Using the t-SNE method to reduce the dimensions from $ n $ to 2 and visualize the embedding vectors.
 
-```{r}
+
+``` r
 unique_drug_names <- unique(complete_drug_names) |> sort()
 ```
 
@@ -183,7 +351,8 @@ When it comes to dimensionality reduction methods like t-SNE, it's important to 
 
 In order to select the optimal choice of perplexity, I decided to use the method of its optimization using a modified Bayesian Schwarz information criterion associated with the KL divergence metric. The goal is to minimize $S(Perplexity)$. You can read more about this optimization technique here: [Automatic Selection of t-SNE Perplexity](https://arxiv.org/abs/1708.03229).
 
-```{r}
+
+``` r
 optimize_perplexity <-
   function(data,
            min_perp = 2,
@@ -214,7 +383,8 @@ optimize_perplexity <-
 
 We also want to figure out which drugs are in the same group. Each group should have drugs that are similar to each other in terms of Levenshtein distance. We'll use the DBSCAN algorithm for this. It doesn't require us to specify the number of clusters upfront. It estimates them based on things like `epsilon`. In other words, it's the furthest distance between two samples that determines if they're considered neighbours. For `minPts` I set the value to 2 (can you guess why?). For `epsilon`, on the other hand, I chose 15, which is due to the construction (offstage) of the k-distance plot
 
-```{r}
+
+``` r
 construct_tsne_with_dbscan <- function(data,
                                        max_perp = 20,
                                        eps = 15,
@@ -254,40 +424,7 @@ construct_tsne_with_dbscan <- function(data,
 
 You'll find the t-SNE result in the graph below. This visualization shows how drug names are grouped together in a two-dimensional space based on how similar they are in terms of their text. Each point shows a drug name, and its position is based on the pairwise Levenshtein distances from the original names. Also, the color of the point shows which cluster it's in. You can see how the points are spread out and close together, which shows clusters of similar names. This could mean that there are some names that are similar but not the same, or that different naming conventions are used. Adding text labels makes it easier to understand what each point represents, so you can quickly identify specific drugs.
 
-```{r, warning=FALSE}
-tsne_df <- construct_tsne_with_dbscan(unique_drug_names)
-
-tsne_df |>
-  ggplot(aes(x = Dim1, y = Dim2, label = Label)) +
-  geom_point(aes(color = Cluster), size = 1) +
-  geom_text_repel(aes(label = Label), max.overlaps = 10, size = 2) +
-  labs(x = "Dimension 1", y = "Dimension 2") +
-  guides(color = "none") +
-  theme_bw()
-```
-
-This graphic is pretty tricky to make sense of because there are so many data points and drug names that are all jumbled together. So, let's take a look at the DBSCAN clustering result instead:
-
-```{r}
-clusters_list <- tsne_df |>
-    dplyr::group_by(Cluster) |>
-    dplyr::summarize(Drugs = paste(Label, collapse = " | ")) |>
-    dplyr::arrange(Cluster)
-  
-  # Print each cluster and the associated drug names
-  for (i in 1:nrow(clusters_list)) {
-    cat("Cluster", clusters_list$Cluster[i], ":\n")
-    cat(clusters_list$Drugs[i], "\n\n")
-  }
-```
-
-For instance, cluster 1 includes a wide variety of drugs, such as acetylsalicylic acid and corticosteroids, aminophylline, bupivacaine, and meloxicam.
-
-Clusters like cluster 5, which includes benzoyl peroxide and its misspelled variant benzoly peroxide, show how useful Levenshtein distance can be for identifying typographical errors. Similarly, cluster 6 brings together different spellings of betamethasone.
-
-This clustering analysis helps us understand the relationships among drug names and the potential issues that similar or identical names can cause. This isn't perfect, though. We still need to check if there are any other similar duplicates (take a look at the first cluster). Also, the Levenshtein metric is designed for editing, so it's not ideal for texts in different languages (see "Kwas foliowy" and "folic acid"). But it can definitely streamline our work and automate the process for future reports, and it provides some interesting insights!
 
 
-# Final Thoughts: Con-meds data in EDC - how to make it clean and meaty?
 
-It's really important to make sure that the data on the drugs people are taking at the same time as the ones being tested (concomitant medications, or "con-meds") is accurate and complete in the systems we use to capture data from clinical trials. To make this happen, we need to automate data entry tasks. Instead of relying on researchers to manually enter drug data, integrating the electronic case report form (eCRF) with a comprehensive drug dictionary, like the WHO Anatomical Therapeutic Chemical (ATC) classification, can make the process a lot more efficient. This integration would make it simple for users to enter or select drug names from a standard list, which would help to avoid errors caused by spelling variations or outdated names. By using these automated solutions, we can make sure that our con-meds data is cleaner and more reliable, which will improve the overall quality of clinical research.
+
