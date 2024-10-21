@@ -13,20 +13,57 @@ services:
     id: "G-3MKP9QPBP1"
 menu:
   main:
-    - name: About
+    - identifier: about
+      name: About us
       url: /about/
-    - name: GitHub
-      url: https://github.com/ttscience
+      weight: 1
+    - identifier: authors
+      name: Authors
+      url: /authors/
+      weight: 2
+    - identifier: archives
+      name: Archive
+      url: /archive/
+      weight: 3
+    - identifier: search
+      name: Search
+      url: /search/
+      weight: 4
 params:
+  env: production
+  math: true
   MathJaxCDN: //cdnjs.cloudflare.com/ajax/libs
-  MathJaxVersion: 2.7.5
+  MathJaxVersion: 3.2.2
   description: Development blog of Transition Technologies Science Clinical Data Science Team.
-  favicon: favicon.ico
   defaultTheme: auto
   ShowReadingTime: true
+  ShowBreadCrumbs: true
+  ShowPostNavLinks: true
+  ShowCodeCopyButtons: true
   homeInfoParams:
-    Title: "Hi there 👋"
-    Content: "Welcome to the TT Science Development Blog! Here, you'll find insights, tutorials, and updates about our work in clinical data science, including R, Python, and optimization techniques. Explore our posts, check out our projects on GitHub, or learn more about our team."
+    Title: "Hey there, data enthusiasts! 👋"
+    Content: "Here at TT Science, we are a dynamic team of individuals — like trees in a [random forest](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html) 🌳🌲 — each bringing our own unique strengths and perspectives to the table. While we share a common goal of advancing clinical data science, it’s our diversity that makes us truly special! <br><br> 🌈 Join us on this exciting journey 🚀 as we share insights, tutorials, and updates on our innovative projects involving R, Python, and biostatistics. 💻🔍 Explore our posts, dive into our GitHub projects 📂, and get to know the passionate minds behind our work. Together, we’re harnessing the power of data to create impactful solutions in healthcare. 💡💖 Welcome to our forest of knowledge! 🌳🌟"
+  assets:
+    favicon: "favicon.ico"
+    favicon16x16: "favicon-16x16.png"
+    favicon32x32: "favicon-32x32.png"
+    apple_touch_icon: "apple-touch-icon.png"
+  socialIcons:
+    - name: "Company website"
+      url: "https://ttsi.com.pl/"
+    - name: "GitHub"
+      url: "https://github.com/ttscience"
+    - name: "LinkedIn"
+      url: "https://www.linkedin.com/company/transition-technologies-science-sp-z-o-o/"
+  fuseOpts:
+    isCaseSensitive: false
+    shouldSort: true
+    location: 0
+    distance: 1000
+    threshold: 0.4
+    minMatchCharLength: 0
+    keys: ["title", "permalink", "summary", "content"]
+  ShowShareButtons: true
 markup:
   highlight:
     noClasses: false # Use classes for more customizable styling via CSS
@@ -36,3 +73,8 @@ markup:
   goldmark:
     renderer:
       unsafe: true
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
