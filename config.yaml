@@ -42,7 +42,7 @@ params:
   ShowCodeCopyButtons: true
   homeInfoParams:
     Title: "Hey there, data enthusiasts! 👋"
-    Content: "Here at TT Science, we are a dynamic team of individuals — like trees in a [random forest](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html) 🌳🌲 — each bringing our own unique strengths and perspectives to the table. While we share a common goal of advancing clinical data science, it’s our diversity that makes us truly special! <br><br> 🌈 Join us on this exciting journey 🚀 as we share insights, tutorials, and updates on our innovative projects involving R, Python, and biostatistics. 💻🔍 Explore our posts, dive into our GitHub projects 📂, and get to know the passionate minds behind our work. Together, we’re harnessing the power of data to create impactful solutions in healthcare. 💡💖 Welcome to our forest of knowledge! 🌳🌟"
+    Content: "You can browse our latest entries below or use the menu above to explore archives, learn more about us, or get in touch. The layout insists on being thorough, so we’re rolling with it!"
   assets:
     favicon: "favicon.ico"
     favicon16x16: "favicon-16x16.png"
