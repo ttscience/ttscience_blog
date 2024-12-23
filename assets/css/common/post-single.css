@@ -34,6 +34,7 @@
 
 .post-content {
     color: var(--content);
+    text-align: justify;
 }
 
 .post-content h3,
@@ -41,16 +42,19 @@
 .post-content h5,
 .post-content h6 {
     margin: 24px 0 16px;
+    text-align: justify;
 }
 
 .post-content h1 {
     margin: 40px auto 32px;
     font-size: 40px;
+    text-align: justify;
 }
 
 .post-content h2 {
     margin: 32px auto 24px;
     font-size: 32px;
+    text-align: justify;
 }
 
 .post-content h3 {

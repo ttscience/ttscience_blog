@@ -1,0 +1,366 @@
+---
+title: Scarce data and simulations
+author: ['kamil-sijko']
+date: '2024-12-23'
+slug: scarce-data-and-simulations
+categories: [R, Monte Carlo, simulations, clinical trials]
+tags: []
+---
+
+In clinical research, we often run simulations to estimate sample sizes and to explore how different scenarios might affect study outcomes. Unfortunately, many people expect simulations to solve all problems related to a lack of information—such as missing intelligence on new drugs or extremely small sample sizes. The reality is more modest. Below is a simple example that demonstrates how beta priors can be generated, how limited data can skew our understanding, and how a monte carlo approach can still provide some insight.
+
+### Assumptions
+
+Suppose we have two hypothetical drugs, each with an unknown probability of curing a particular condition. For demonstration purposes, let’s assume:
+
+- Drug A has a true cure rate of 50%  
+- Drug B has a true cure rate of 60%  
+
+In reality, we would not know these numbers, but they help show where the “true” values lie in our plots.
+
+Imagine we tested each drug on only 5 people. By chance, we might see something like:
+
+- Drug A: 2 out of 5 cured (i.e., 40% observed)  
+- Drug B: 3 out of 5 cured (i.e., 60% observed)
+
+With such small samples, it’s hard to be confident in either result. Nevertheless, we can use these outcomes as the starting point for our priors.
+
+
+``` r
+# ---------------------------------------------------------
+# 1. Setup: small sample observations
+# ---------------------------------------------------------
+drugA_observed <- 2  # 2 cures out of 5
+drugB_observed <- 3  # 3 cures out of 5
+n_per_group <- 5
+
+# "True" cure rates (for illustration only; unknown in real life)
+true_pA <- 0.50
+true_pB <- 0.60
+
+# Observed proportions from the (tiny) sample
+obs_propA <- drugA_observed / n_per_group  # 0.4
+obs_propB <- drugB_observed / n_per_group  # 0.6
+
+# ---------------------------------------------------------
+# 2. Define Beta(1,1) priors and calculate posteriors
+# ---------------------------------------------------------
+# Neutral, uniform priors for both drugs (Beta(1,1))
+# Posterior = Beta(1 + x, 1 + n - x)
+
+# Drug A: 2 cures, 3 non-cures
+alphaA <- 1 + drugA_observed
+betaA  <- 1 + (n_per_group - drugA_observed)
+
+# Drug B: 3 cures, 2 non-cures
+alphaB <- 1 + drugB_observed
+betaB  <- 1 + (n_per_group - drugB_observed)
+
+# Calculate posterior modes (if alpha, beta > 1)
+modeA <- if (alphaA > 1 & betaA > 1) (alphaA - 1) / (alphaA + betaA - 2) else NA
+modeB <- if (alphaB > 1 & betaB > 1) (alphaB - 1) / (alphaB + betaB - 2) else NA
+
+# ---------------------------------------------------------
+# 3. Plot prior vs. posterior for each drug
+# ---------------------------------------------------------
+library(ggplot2)
+
+x_vals <- seq(0, 1, length.out = 200)
+
+df <- data.frame(
+  x = rep(x_vals, 4),
+  y = c(
+    dbeta(x_vals, 1, 1),                 # A/B Prior (Beta(1,1))
+    dbeta(x_vals, alphaA, betaA),        # A Posterior
+    dbeta(x_vals, 1, 1),                 # A/B Prior (Beta(1,1)) again
+    dbeta(x_vals, alphaB, betaB)         # B Posterior
+  ),
+  group = rep(c("A Prior", "A Posterior", "B Prior", "B Posterior"),
+              each = length(x_vals))
+)
+
+p <- ggplot(df, aes(x = x, y = y, color = group)) +
+  geom_line(linewidth = 1) +
+  # Vertical lines for "true" proportions, observed proportions, and posterior modes
+  geom_vline(xintercept = true_pA, color = "red", linetype = "dotted") +
+  geom_vline(xintercept = true_pB, color = "#00BFC4", linetype = "dotted") +
+  geom_vline(xintercept = obs_propA, color = "red", linetype = "solid") +
+  geom_vline(xintercept = obs_propB, color = "#00BFC4", linetype = "solid") +
+  geom_vline(xintercept = modeA, color = "red", linetype = "longdash") +
+  geom_vline(xintercept = modeB, color = "#00BFC4", linetype = "longdash") +
+  labs(
+    title    = "Comparing Beta Priors and Posteriors",
+    subtitle = "Drug A (2/5) and Drug B (3/5), starting with Beta(1,1) priors",
+    x        = "Cure Probability",
+    y        = "Density"
+  ) +
+  theme_minimal()
+
+print(p)
+```
+
+<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-1-1.png" width="672" />
+
+In this figure, notice the two distinct stages:
+ - Prior distributions (Beta(1,1)): The uniform lines (flat from 0 to 1) indicate we had no preference or knowledge about the cure rates beforehand.
+ - Posterior distributions: Each posterior (red for A, blue/teal for B) is “pulled” toward the observed data (0.4 for A, 0.6 for B). With only 5 patients in each group, these distributions remain quite broad.
+
+We’ve also added vertical dotted lines for the “true” cure probabilities (0.50 for Drug A, 0.60 for Drug B). In a real clinical setting, we wouldn’t know these values—they’re shown here to illustrate how our limited data and priors line up with reality.
+
+# Monte Carlo simulation
+
+Once we have these posterior distributions, we can do the following to compare Drugs A and B:
+
+1.	Draw a random value from Beta(3,4) for Drug A (representing its cure rate in a “what if” scenario, given the posterior).
+2.	Draw a random value from Beta(4,3) for Drug B.
+3.	Compare which one is higher.
+4.	Repeat many times (e.g., 10,000 or more iterations) to see how often B appears better than A.
+
+
+``` r
+# ---------------------------------------------------------
+# 4. Monte Carlo simulation:
+#    How often does Drug B outperform Drug A?
+# ---------------------------------------------------------
+set.seed(123)
+n_sims <- 10000
+
+simA <- rbeta(n_sims, alphaA, betaA)
+simB <- rbeta(n_sims, alphaB, betaB)
+
+# Proportion of times B has a higher cure rate than A in simulation
+prop_B_better <- mean(simB > simA)
+prop_B_better
+```
+
+```
+## [1] 0.7235
+```
+
+Here, prop_B_better tells us the fraction of our simulation draws in which Drug B’s sampled cure rate exceeded Drug A’s. For instance, if it equals 0.72, that implies that in about 72% of the draws, B was “better” than A.
+
+
+``` r
+# Distribution of differences (B - A):
+diff_sim <- simB - simA
+summary(diff_sim)
+```
+
+```
+##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+## -0.67644 -0.01978  0.15362  0.14700  0.32216  0.89431
+```
+
+
+``` r
+quantile(diff_sim, probs = c(0.025, 0.5, 0.975))
+```
+
+```
+##       2.5%        50%      97.5% 
+## -0.3541899  0.1536205  0.6023966
+```
+
+Overall, these results illustrate how much uncertainty remains with such a small dataset. A high prop_B_better implies that, given the data and the prior, B is likely to be the better option—yet the wide range in diff_sim shows that there’s still room for doubt if the difference is near zero or even negative.
+
+## Power
+
+Below is an extended demonstration that shows why the 72% figure from a Monte Carlo comparison does not translate to "72% power". In this additional step, we take the random cure probabilities (drawn from each posterior) and simulate a hypothetical future trial of N=100 participants per arm, then run a simple statistical test (like a two-sample proportion test). You will see that the proportion of times Drug B “wins” in a statistical sense can be considerably different from that 72% figure.
+
+
+``` r
+# We'll store how often B's outcome is statistically significant vs. A
+n_future <- 40    # hypothetical future trial size for each group
+alpha_level <- 0.05
+significant_B_better <- numeric(n_sims)  # 0/1 for each iteration
+
+for (i in 1:n_sims) {
+  # 1) Sample pA, pB from the posterior draws
+  pA <- simA[i]
+  pB <- simB[i]
+  
+  # 2) Simulate new binomial data as if we ran a 100-person trial in each arm
+  curesA <- rbinom(1, n_future, pA)
+  curesB <- rbinom(1, n_future, pB)
+  
+  # 3) Run a simple two-sample proportion test (chi-square or normal approx)
+  test_res <- suppressWarnings(
+    prop.test(x = c(curesA, curesB),
+              n = c(n_future, n_future),
+              alternative = "two.sided")
+  )
+  
+  # 4) Check if B is significantly better. One way is:
+  #    - test_res$p.value < alpha_level
+  #    - also check the direction of difference (pB > pA)
+  
+  if (test_res$p.value < alpha_level) {
+    # Check which group had higher observed proportion
+    if ( (curesB / n_future) > (curesA / n_future) ) {
+      significant_B_better[i] <- 1
+    }
+  }
+}
+
+# Proportion of times we get a significant result in favor of B
+prop_sig_B <- mean(significant_B_better)
+prop_sig_B
+```
+
+```
+## [1] 0.3892
+```
+
+In the previous chunk, we estimated that with a future trial size of N = 40 per arm, we might achieve a statistical power in the range of 30–40%. This estimate hinges on a specific observed dataset and how it informed our posteriors. But data come in varying sizes and strengths. Sometimes we have only a trickle of information, sometimes we have more robust findings.
+
+To better illustrate how the initial evidence level affects both (1) our Bayesian confidence that one drug is better than the other, and (2) our frequentist power to detect a difference in a new trial, we define two functions:
+
+1.	A posterior comparison function: Determines how often Drug B appears better than Drug A when repeatedly drawing from their respective Beta posteriors.
+2.	A future trial simulation function: Uses a chosen “truth” (e.g., the posterior means) to simulate new binomial datasets of size N=40 per arm and then runs a standard proportion test, recording how often B is found statistically superior.
+
+By applying these functions to different observed data scenarios—ranging from weaker to stronger signals—we can see how our confidence in B’s superiority and the likelihood of a significant result in a new study both change.
+
+
+``` r
+# ---------------------------------------------------------
+# 1. function for posterior comparison (density-based)
+#    returns the fraction of draws where B > A
+# ---------------------------------------------------------
+compare_posteriors <- function(a_observed, b_observed, n_each_arm, 
+                               prior_alpha = 1, prior_beta = 1, 
+                               n_sims = 10000, seed = 123) {
+  set.seed(seed)
+  
+  # posterior parameters for A
+  alphaA <- prior_alpha + a_observed
+  betaA  <- prior_beta + (n_each_arm - a_observed)
+  
+  # posterior parameters for B
+  alphaB <- prior_alpha + b_observed
+  betaB  <- prior_beta + (n_each_arm - b_observed)
+  
+  # draw random cure probabilities from the posterior
+  simA <- rbeta(n_sims, alphaA, betaA)
+  simB <- rbeta(n_sims, alphaB, betaB)
+  
+  # fraction of draws in which B is higher
+  mean(simB > simA)
+}
+
+# ---------------------------------------------------------
+# 2. function for simulating a future trial (power-based)
+#    using the posterior means for A & B as "true" p
+#    returns fraction of times B significantly better
+# ---------------------------------------------------------
+simulate_future_trial <- function(a_observed, b_observed, n_each_arm, 
+                                  prior_alpha = 1, prior_beta = 1,
+                                  future_n = 100, 
+                                  n_sims = 10000, alpha_level = 0.05,
+                                  seed = 123) {
+  set.seed(seed)
+  
+  # posterior parameters for A
+  alphaA <- prior_alpha + a_observed
+  betaA  <- prior_beta + (n_each_arm - a_observed)
+  
+  # posterior parameters for B
+  alphaB <- prior_alpha + b_observed
+  betaB  <- prior_beta + (n_each_arm - b_observed)
+  
+  # approximate the "true" pA, pB as the posterior means
+  # (another approach: sample from the posterior for each sim)
+  pA <- alphaA / (alphaA + betaA)
+  pB <- alphaB / (alphaB + betaB)
+  
+  significant_B_better <- numeric(n_sims)  
+  
+  for (i in seq_len(n_sims)) {
+    # simulate new binomial data for a future trial
+    curesA <- rbinom(1, future_n, pA)
+    curesB <- rbinom(1, future_n, pB)
+    
+    # run a two-sample proportion test
+    test_res <- prop.test(x = c(curesA, curesB),
+                          n = c(future_n, future_n),
+                          alternative = "two.sided")
+    
+    # check significance + direction
+    if (test_res$p.value < alpha_level) {
+      if ((curesB / future_n) > (curesA / future_n)) {
+        significant_B_better[i] <- 1
+      }
+    }
+  }
+  
+  mean(significant_B_better)
+}
+
+# ---------------------------------------------------------
+# 3. demonstration at different scales
+#    e.g., we start with an original observation:
+#      Drug A: 4 out of 10
+#      Drug B: 6 out of 10
+#    then scale the counts by x2, x5, x10, x20
+# ---------------------------------------------------------
+multipliers <- c(1, 2, 5, 10, 20)
+original_a <- 4
+original_b <- 6
+original_n <- 10
+
+results_list <- lapply(multipliers, function(m) {
+  # scaled data
+  a_scaled <- original_a * m
+  b_scaled <- original_b * m
+  n_scaled <- original_n * m
+  
+  
+  # 1) fraction of draws in which B > A (posterior only)
+  frac_density <- compare_posteriors(
+    a_observed = a_scaled,
+    b_observed = b_scaled,
+    n_each_arm = n_scaled,
+    prior_alpha = 1, 
+    prior_beta = 1,
+    n_sims = 10000
+  )
+  
+  # 2) fraction of times a future trial shows B significantly better
+  frac_power <- simulate_future_trial(
+    a_observed = a_scaled,
+    b_observed = b_scaled,
+    n_each_arm = n_scaled,
+    prior_alpha = 1,
+    prior_beta = 1,
+    future_n = 40,  # hypothetical new trial size
+    n_sims = 10000
+  )
+  
+  data.frame(
+    Scale         = m,
+    Observed_A    = a_scaled,
+    Observed_B    = b_scaled,
+    N_per_arm     = n_scaled,
+    Posterior_B_Better = round(frac_density, 3),
+    Future_Trial_Sig   = round(frac_power, 3)
+  )
+})
+
+final_results <- do.call(rbind, results_list)
+final_results
+```
+
+```
+##   Scale Observed_A Observed_B N_per_arm Posterior_B_Better Future_Trial_Sig
+## 1     1          4          6        10              0.805            0.262
+## 2     2          8         12        20              0.893            0.310
+## 3     5         20         30        50              0.977            0.345
+## 4    10         40         60       100              0.997            0.358
+## 5    20         80        120       200              1.000            0.365
+```
+
+In each case, we assume the same ground truth and the same future study size (N = 40 per arm). What differs is our initial evidence base (weaker or stronger observed data). As that observed base scales up, two things happen:
+
+- Our posterior probabilities of B being better grow, reflecting increasing Bayesian confidence.
+- Our estimated statistical power to declare B superior at a conventional alpha level also tends to rise, though often more modestly than the posterior probability alone might suggest.
+
+The simulations show that limited data does indeed reduce our certainty and, in turn, influences our estimated power. Although the shift from about 26% to 36% may not seem massive, it’s still a meaningful increase—yet these figures remain relatively low in absolute terms. Ultimately, simulations won’t “solve” the small sample challenge; instead, they incorporate it to provide the most realistic view of your current situation. If your evidence base is weak, your power calculations will reflect that, reminding you that a larger, more robust dataset is often needed to confidently detect a true difference.
